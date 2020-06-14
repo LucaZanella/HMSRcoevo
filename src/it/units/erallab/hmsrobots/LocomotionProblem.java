@@ -44,7 +44,7 @@ public class LocomotionProblem implements TunablePrecisionProblem<Robot, List<Do
         return getFitnessFunction(metrics);
     }
 
-    private NonDeterministicBiFunction<Robot, Double, List<Double>> getTunablePrecisionFitnessFunction(List<Locomotion.Metric> localMetrics) {
+    protected NonDeterministicBiFunction<Robot, Double, List<Double>> getTunablePrecisionFitnessFunction(List<Locomotion.Metric> localMetrics) {
         return (Robot robot, Double p, Random random, Listener listener) -> {
             double dT = minDT;
             double finalT = maxFinalT;

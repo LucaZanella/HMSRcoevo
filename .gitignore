@@ -72,3 +72,4 @@ fabric.properties
 
 # Manually added files
 .idea/*
+output/

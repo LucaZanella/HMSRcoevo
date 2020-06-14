@@ -7,6 +7,7 @@ import it.units.erallab.hmsrobots.core.controllers.Controller;
 import it.units.erallab.hmsrobots.core.controllers.MultiLayerPerceptron;
 import it.units.erallab.hmsrobots.core.objects.Robot;
 import it.units.erallab.hmsrobots.core.objects.SensingVoxel;
+import it.units.erallab.hmsrobots.core.objects.Voxel;
 import it.units.erallab.hmsrobots.core.sensors.*;
 import it.units.erallab.hmsrobots.tasks.Locomotion;
 import it.units.erallab.hmsrobots.util.Grid;
@@ -19,6 +20,7 @@ import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.function.Function;
+import it.units.malelab.jgea.core.function.NonDeterministicBiFunction;
 import it.units.malelab.jgea.core.function.NonDeterministicFunction;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -84,7 +86,7 @@ public class Main extends Worker {
                 sensors.add(new Velocity(true, 3d, Velocity.Axis.X, Velocity.Axis.Y));
             }
             if (x == shape.getW() - 1) {
-                double rayLength = shape.getW();
+                double rayLength = shape.getW() * Voxel.SIDE_LENGTH;
                 LinkedHashMap<Lidar.Side, Integer> raysPerSide = new LinkedHashMap<>() {{
                     put(Lidar.Side.E, 5);
                 }};
@@ -107,13 +109,13 @@ public class Main extends Worker {
         int nPop = i(a("npop", "100"));
         int iterations = i(a("iterations", "100"));
         int cacheSize = i(a("cacheSize", "10000"));
-        boolean statsToStandardOutput = b(a("stout", "true"));
+        boolean statsToStandardOutput = b(a("stout", "false"));
         List<Locomotion.Metric> metrics = Lists.newArrayList(
                 Locomotion.Metric.TRAVEL_X_RELATIVE_VELOCITY
         );
         // prepare things
         MultiFileListenerFactory statsListenerFactory = new MultiFileListenerFactory(a("dir", "."), a("fileStats", null));
-        MultiFileListenerFactory serializedBestListenerFactory = new MultiFileListenerFactory(a("dir", "."), a("fileSerialzied", null));
+        MultiFileListenerFactory serializedBestListenerFactory = new MultiFileListenerFactory(a("dir", "."), a("fileSerialized", null));
         // iterate
         for (int run : runs) {
             for (String shapeName : shapeNames) {
@@ -225,7 +227,7 @@ public class Main extends Worker {
                                             new BestInfo<>(problem.getFitnessFunction(metrics), "%+5.3f"),
                                             new FunctionOfBest<>(
                                                     "valid",
-                                                    problem.getFitnessFunction(Lists.newArrayList(Locomotion.Metric.values())),
+                                                    (Robot robot, Listener listener) -> problem.getTunablePrecisionFitnessFunction(Lists.newArrayList(Locomotion.Metric.values())).apply(SerializationUtils.clone(robot), 0d, new Random(1), listener),
                                                     Arrays.stream(Locomotion.Metric.values()).map((m) -> {
                                                         return m.toString().toLowerCase().replace("_", ".");
                                                     }).collect(Collectors.toList()),
