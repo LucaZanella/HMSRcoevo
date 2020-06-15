@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import it.units.erallab.hmsrobots.core.controllers.CentralizedMLP;
 import it.units.erallab.hmsrobots.core.controllers.Controller;
-import it.units.erallab.hmsrobots.core.controllers.MultiLayerPerceptron;
 import it.units.erallab.hmsrobots.core.objects.Robot;
 import it.units.erallab.hmsrobots.core.objects.SensingVoxel;
 import it.units.erallab.hmsrobots.core.objects.Voxel;
@@ -15,12 +14,11 @@ import it.units.erallab.hmsrobots.util.Util;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Factory;
 import it.units.malelab.jgea.core.Individual;
-import it.units.malelab.jgea.core.evolver.CMAEvolutionStrategy;
+import it.units.malelab.jgea.core.evolver.CovarianceMatrixAdaptationES;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.function.Function;
-import it.units.malelab.jgea.core.function.NonDeterministicBiFunction;
 import it.units.malelab.jgea.core.function.NonDeterministicFunction;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -197,11 +195,12 @@ public class Main extends Worker {
                                         int size = ((DoubleSequenceFactory) factory).getLength();
                                         double initMin = ((DoubleSequenceFactory) factory).getMin();
                                         double initMax = ((DoubleSequenceFactory) factory).getMax();
-                                        evolver = new CMAEvolutionStrategy<>(
+                                        evolver = new CovarianceMatrixAdaptationES<>(
                                                 size,
                                                 initMin,
                                                 initMax,
-                                                new ComparableRanker(new FitnessComparator(Function.identity())),
+                                                new ParetoRanker<>(false),
+                                                mapper,
                                                 Lists.newArrayList(new Iterations(iterations)),
                                                 cacheSize
                                         );
