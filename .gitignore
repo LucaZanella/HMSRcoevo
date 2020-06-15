@@ -73,3 +73,7 @@ fabric.properties
 # Manually added files
 .idea/*
 output/
+data/*
+video/*
+pom.xml
+target/*
