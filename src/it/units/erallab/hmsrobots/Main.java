@@ -122,15 +122,15 @@ public class Main extends Worker {
                         for (String controllerName : controllerNames) {
                             for (double mutationSigma : mutationSigmas) {
                                 for (double drivingFrequency : drivingFrequencies) {
+                                    // prepare robot related things
+                                    Grid<Boolean> shape = namedShapes.get(shapeName);
                                     // build problem
                                     LocomotionProblem problem = new LocomotionProblem(
                                             finalT, minDT, maxDT,
-                                            Locomotion.createTerrain(terrainName),
+                                            Locomotion.createTerrain(terrainName, shape.getW() * Voxel.SIDE_LENGTH, shape.getH() * Voxel.SIDE_LENGTH),
                                             metrics,
                                             LocomotionProblem.ApproximationMethod.FINAL_T
                                     );
-                                    // prepare robot related things
-                                    Grid<Boolean> shape = namedShapes.get(shapeName);
                                     // prepare factory and mapper
                                     Factory<Sequence<Double>> factory = null;
                                     NonDeterministicFunction<Sequence<Double>, Robot> mapper = null;
