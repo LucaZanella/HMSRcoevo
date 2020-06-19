@@ -96,9 +96,9 @@ public class Main extends Worker {
         // read parameters
         int[] runs = ri(a("run", "0"));
         List<String> shapeNames = l(a("shape", "biped")); // worm,biped
-        List<String> terrainNames = l(a("terrain", "flat")); // flat,hardcore
+        List<String> terrainNames = l(a("terrain", "hardcore")); // flat,hardcore
         List<String> evolverNames = l(a("evolver", "standard-2op")); //standard-1|2op,cma-es
-        List<String> controllerNames = l(a("controller", "centralizedMLP-0-sighted.0"));
+        List<String> controllerNames = l(a("controller", "centralizedMLP-0-blind.0"));
         double finalT = d(a("finalT", "60"));
         double minDT = d(a("minDT", "0.0333"));
         double maxDT = d(a("maxDT", "0.0333"));
@@ -122,15 +122,15 @@ public class Main extends Worker {
                         for (String controllerName : controllerNames) {
                             for (double mutationSigma : mutationSigmas) {
                                 for (double drivingFrequency : drivingFrequencies) {
-                                    // prepare robot related things
-                                    Grid<Boolean> shape = namedShapes.get(shapeName);
                                     // build problem
                                     LocomotionProblem problem = new LocomotionProblem(
                                             finalT, minDT, maxDT,
-                                            Locomotion.createTerrain(terrainName, shape.getW() * Voxel.SIDE_LENGTH, shape.getH() * Voxel.SIDE_LENGTH),
+                                            Locomotion.createTerrain(terrainName),
                                             metrics,
                                             LocomotionProblem.ApproximationMethod.FINAL_T
                                     );
+                                    // prepare robot related things
+                                    Grid<Boolean> shape = namedShapes.get(shapeName);
                                     // prepare factory and mapper
                                     Factory<Sequence<Double>> factory = null;
                                     NonDeterministicFunction<Sequence<Double>, Robot> mapper = null;
@@ -244,15 +244,18 @@ public class Main extends Worker {
                                     Listener listener = statsListenerFactory.build(
                                             statsCollectors.toArray(new DataCollector[statsCollectors.size()])
                                     ).then(serializedBestListenerFactory.build(
-                                            serializedCollectors.toArray(new DataCollector[serializedCollectors.size()])
+                                            serializedCollectors.toArracreatey(new DataCollector[serializedCollectors.size()])
                                     ));
                                     if (statsToStandardOutput) {
                                         listener = listener.then(listener(statsCollectors.toArray(new DataCollector[statsCollectors.size()])));
                                     }
                                     try {
                                         evolver.solve(problem, r, executorService, Listener.onExecutor(listener, executorService));
-                                    } catch (InterruptedException | ExecutionException ex) {
-                                        L.log(Level.SEVERE, String.format("Cannot solve problem: %s", ex), ex);
+//                                    } catch (InterruptedException | ExecutionException ex) {
+//                                        L.log(Level.SEVERE, String.format("Cannot solve problem: %s", ex), ex);
+//                                    }
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
                                     }
                                 }
                             }
